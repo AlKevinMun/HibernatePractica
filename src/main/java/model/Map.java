@@ -70,4 +70,14 @@ public class Map implements Serializable{
     public void setSize(String size) {
         this.size = size;
     }
+
+    @Override
+    public String toString() {
+        return String.format("| %-10s | %-20s | %-20s | %-15s | %-10s |",
+                "id_map", "map_name", "creator", "max_players", "size") +
+                String.format("\n| %-10s | %-20s | %-20s | %-15s | %-10s |",
+                        id, mapName, creator, maxPlayers, size);
+    }
+
+
 }

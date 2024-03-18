@@ -11,10 +11,11 @@ import org.hibernate.Session;
 import org.hibernate.query.Query;
 import org.jboss.jandex.Main;
 
-import javax.persistence.EntityManager;
-import javax.persistence.EntityManagerFactory;
-import javax.persistence.NoResultException;
-import javax.persistence.PersistenceContext;
+import javax.persistence.*;
+import javax.persistence.criteria.CriteriaBuilder;
+import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.Join;
+import javax.persistence.criteria.Root;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
@@ -87,6 +88,21 @@ public class PlayerController {
         } catch (NoResultException e) {
             // Manejar el caso donde no se encontró un Commander en la base de datos
             return null;
+        }
+    }
+
+    public List<Player> findPlayersByCommander(Commander commander) {
+        EntityManager entityManager = entityManagerFactory.createEntityManager();
+        try {
+            CriteriaBuilder criteriaBuilder = entityManager.getCriteriaBuilder();
+            CriteriaQuery<Player> criteriaQuery = criteriaBuilder.createQuery(Player.class);
+            Root<Player> root = criteriaQuery.from(Player.class);
+            Join<Player, Commander> commanderJoin = root.join("commander");
+            criteriaQuery.select(root).where(criteriaBuilder.equal(commanderJoin.get("commanderName"), commander.getCommanderName()));
+            TypedQuery<Player> query = entityManager.createQuery(criteriaQuery);
+            return query.getResultList();
+        } finally {
+            entityManager.close();
         }
     }
 

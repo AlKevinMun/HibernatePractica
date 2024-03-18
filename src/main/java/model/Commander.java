@@ -29,4 +29,10 @@ public class Commander implements Serializable{
     public void setCommanderName(String commanderName) {
         this.commanderName = commanderName;
     }
+
+    @Override
+    public String toString() {
+        return String.format("| %-10s | %-20s |", "commander_id", "commander_name") +
+                String.format("\n| %-10s | %-20s |", id, commanderName);
+    }
 }

@@ -2,8 +2,7 @@ package controller;
 
 import com.opencsv.CSVReader;
 import com.opencsv.exceptions.CsvValidationException;
-import model.Commander;
-import model.Game;
+import model.Games;
 import model.Map;
 import model.Player;
 import org.hibernate.HibernateException;
@@ -13,6 +12,10 @@ import org.hibernate.query.Query;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.NoResultException;
+import javax.persistence.TypedQuery;
+import javax.persistence.criteria.CriteriaBuilder;
+import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.Root;
 import java.io.FileReader;
 import java.io.IOException;
 import java.sql.SQLException;
@@ -35,11 +38,11 @@ public class GameController {
         this.session = this.entityManager.unwrap(Session.class);
     }
 
-    public ArrayList<Game> readDataFromCSV() throws IOException, SQLException, CsvValidationException {
+    public ArrayList<Games> readDataFromCSV() throws IOException, SQLException, CsvValidationException {
         CSVReader reader = new CSVReader(new FileReader("src/main/resources/games.csv"));
         String[] data = null;
         reader.readNext();
-        ArrayList<Game> games = new ArrayList<>();
+        ArrayList<Games> games = new ArrayList<>();
         while ((data = reader.readNext()) !=null){
             String game_name = data[0];
             String map_name = data[1];
@@ -63,7 +66,7 @@ public class GameController {
                 throw new RuntimeException("No se encontró un comandante con el nombre: " + map_name);
             }
 
-            Game game = new Game(game_name, map, playerSet);
+            Games game = new Games(game_name, map, playerSet);
             games.add(game);
 
         }
@@ -89,13 +92,42 @@ public class GameController {
             return null;
         }
     }
-    public Game findGameByName(String gameName) {
+    public Games findGameByName(String gameName) {
         try {
-            return entityManager.createQuery("SELECT c FROM Game c WHERE c.name = :name", Game.class)
+            return entityManager.createQuery("SELECT c FROM Game c WHERE c.name = :name", Games.class)
                     .setParameter("name", gameName)
                     .getSingleResult();
         } catch (NoResultException e) {
             return null;
+        }
+    }
+
+    public List<Games> findGamesByMap(Map map) {
+        EntityManager entityManager = entityManagerFactory.createEntityManager();
+        try {
+            CriteriaBuilder criteriaBuilder = entityManager.getCriteriaBuilder();
+            CriteriaQuery<Games> criteriaQuery = criteriaBuilder.createQuery(Games.class);
+            Root<Games> root = criteriaQuery.from(Games.class);
+            criteriaQuery.select(root).where(criteriaBuilder.equal(root.get("map"), map));
+            TypedQuery<Games> query = entityManager.createQuery(criteriaQuery);
+            return query.getResultList();
+        } finally {
+            entityManager.close();
+        }
+    }
+
+    public List<Games> findGamesByPlayer(Player player) {
+        EntityManager entityManager = entityManagerFactory.createEntityManager();
+        try {
+            CriteriaBuilder criteriaBuilder = entityManager.getCriteriaBuilder();
+            CriteriaQuery<Games> criteriaQuery = criteriaBuilder.createQuery(Games.class);
+            Root<Games> root = criteriaQuery.from(Games.class);
+            root.fetch("players"); // Cargar explícitamente la colección de jugadores
+            criteriaQuery.select(root).where(criteriaBuilder.equal(root.join("players"), player));
+            TypedQuery<Games> query = entityManager.createQuery(criteriaQuery);
+            return query.getResultList();
+        } finally {
+            entityManager.close();
         }
     }
 

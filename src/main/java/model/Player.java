@@ -100,4 +100,13 @@ public class Player implements Serializable {
     public void setCommander(Commander commander) {
         this.commander = commander;
     }
+
+    @Override
+    public String toString() {
+        return String.format("| %-10s | %-20s | %-20s | %-15s | %-10s | %-20s |",
+                "id_player", "player_name", "last_activity", "official_rating", "wld", "winrate") +
+                String.format("\n| %-10s | %-20s | %-20s | %-15s | %-10s | %-20s |",
+                        id, name, lastActivity, officialRating, wld, winrate);
+    }
+
 }

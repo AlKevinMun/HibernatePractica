@@ -1,7 +1,7 @@
 package controller;
 
 import model.Commander;
-import model.Game;
+import model.Games;
 import model.Map;
 import model.Player;
 import org.hibernate.HibernateException;
@@ -11,8 +11,6 @@ import org.hibernate.query.Query;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.PersistenceContext;
-import javax.persistence.metamodel.EntityType;
-import javax.persistence.metamodel.Metamodel;
 import java.io.FileNotFoundException;
 import java.sql.SQLException;
 import java.util.*;
@@ -208,7 +206,7 @@ public class MainController {
             gameController.showGamesNames();
             System.out.println("Escribe el nombre del juego que deseas editar: ");
             String nombreJuego = scanner.nextLine();
-            Game juegoExistente = gameController.findGameByName(nombreJuego);
+            Games juegoExistente = gameController.findGameByName(nombreJuego);
             if (juegoExistente != null) {
                 System.out.println("Inserta que atributo quieres modificar ('map' para mapa, 'player' para jugador): ");
                 String att = scanner.nextLine();
@@ -252,32 +250,258 @@ public class MainController {
             System.out.println("Opción no válida.");
         }
     }
-
-
-    public void eliminarEntidad(String option){
+    public void eliminarEntidad(String option) {
         Scanner scanner = new Scanner(System.in);
-        if(option.equals("commander")){
+
+        if(option.equals("commander")) {
             commanderController.showCommanderNames();
-            System.out.println("Inserta el nombre de la entidad que quieres borrar: ");
-            String nombre = scanner.nextLine();
-            delete(playerController.findCommanderByName(nombre));
+            System.out.println("Inserta el nombre del comandante que deseas borrar: ");
+            String commanderName = scanner.nextLine();
+            Commander commander = playerController.findCommanderByName(commanderName);
+
+            // Buscar y eliminar todas las referencias al comandante en la tabla player
+            List<Player> playersReferencingCommander = playerController.findPlayersByCommander(commander);
+            for (Player player : playersReferencingCommander) {
+                player.setCommander(null); // Eliminar la referencia al comandante en el jugador
+                update(player); // Actualizar el jugador
+            }
+
+            // Ahora puedes eliminar el comandante
+            delete(commander);
         } else if (option.equals("map")) {
             mapController.showMapNames();
             System.out.println("Inserta el nombre de la entidad que quieres borrar: ");
             String nombre = scanner.nextLine();
-            delete(gameController.findMapByName(nombre));
+            Map map = gameController.findMapByName(nombre);
+            List<Games> gamesReferencingMap = gameController.findGamesByMap(map);
+            if (gamesReferencingMap.isEmpty()) {
+                delete(map);
+            } else {
+                for (Games games : gamesReferencingMap) {
+                    games.setMap(null);
+                    update(games);
+                }
+                delete(map);
+            }
         } else if (option.equals("player")) {
             playerController.showPlayerNames();
-            System.out.println("Inserta el nombre de la entidad que quieres borrar: ");
-            String nombre = scanner.nextLine();
-            delete(gameController.findPlayerByName(nombre));
+            System.out.println("Inserta el nombre del jugador que deseas borrar: ");
+            String playerName = scanner.nextLine();
+            Player player = gameController.findPlayerByName(playerName);
+
+            // Buscar y eliminar todas las referencias al jugador en la tabla game_players
+            List<Games> gamesReferencingPlayer = gameController.findGamesByPlayer(player);
+            for (Games games : gamesReferencingPlayer) {
+                games.getPlayers().remove(player); // Eliminar al jugador de la lista de jugadores del juego
+                update(games); // Actualizar el juego
+            }
+
+            // Ahora puedes eliminar al jugador
+            delete(player);
         } else if (option.equals("games")) {
             gameController.showGamesNames();
-            System.out.println("Inserta el nombre de la entidad que quieres borrar: ");
-            String nombre = scanner.nextLine();
-            delete(gameController.findGameByName(nombre));
+            System.out.println("Inserta el nombre del juego que deseas borrar: ");
+            String gameName = scanner.nextLine();
+            Games games = gameController.findGameByName(gameName);
+
+            Map map = games.getMap();
+            if (map != null) {
+                List<Games> gamesReferencingMap = gameController.findGamesByMap(map);
+                for (Games referencingGames : gamesReferencingMap) {
+                    referencingGames.setMap(null); // Eliminar la referencia al mapa en el juego
+                    update(referencingGames); // Actualizar el juego
+                }
+            }
+
+            // Eliminar las filas de game_players que corresponden a la partida a eliminar
+            javax.persistence.Query query = entityManager.createQuery("DELETE FROM GamePlayer gp WHERE gp.game.id = :gameId");
+            query.setParameter("gameId", games.getId());
+            int rowsAffected = query.executeUpdate();
+            System.out.println(rowsAffected + " filas eliminadas de game_players.");
+
+            // Finalmente, eliminar el juego
+            delete(games);
         }
     }
+    public void eliminarRegistro(String option){
+        Scanner scanner = new Scanner(System.in);
+        showAttributeNames(option);
+        System.out.println("Inserta el registro a eliminar: ");
+        String att = scanner.nextLine();
+        if (option.equals("commander")){
+            commanderController.showCommanderNames();
+            System.out.println("En cual quieres eliminar el registro: ");
+            String reg = scanner.nextLine();
+            Commander commanderExistente = playerController.findCommanderByName(reg);
+            if (att.equals("commander_name")) {
+                commanderExistente.setCommanderName("");
+            }
+            update(commanderExistente);
+        } else if (option.equals("map")) {
+            mapController.showMapNames();
+            System.out.println("En cual quieres eliminar el registro: ");
+            String reg = scanner.nextLine();
+            Map map = gameController.findMapByName(reg);
+            if (att.equals("map_name")) {
+                map.setMapName("");
+            } else if (att.equals("creator")) {
+                map.setCreator("");
+            } else if (att.equals("max_players")) {
+                map.setMaxPlayers(0);
+            } else if (att.equals("size")) {
+                map.setSize("");
+            }
+            update(map);
+        } else if (option.equals("player")) {
+            playerController.showPlayerNames();
+            System.out.println("En cual quieres eliminar el registro: ");
+            String reg = scanner.nextLine();
+            Player player = gameController.findPlayerByName(reg);
+            if (att.equals("player_name")) {
+                player.setName("");
+            } else if (att.equals("last_activity")) {
+                player.setLastActivity("");
+            } else if (att.equals("official_rating")) {
+                player.setOfficialRating("");
+            } else if (att.equals("wld")) {
+                player.setWld("");
+            } else if (att.equals("winrate")) {
+                player.setWinrate(0);
+            }
+            update(player);
+        } else if (option.equals("games")) {
+            gameController.showGamesNames();
+            System.out.println("En cual quieres eliminar el registro: ");
+            String reg = scanner.nextLine();
+            Games gamesExistente = gameController.findGameByName(reg);
+            if (att.equals("game_name")) {
+                gamesExistente.setName("");
+            } else if (att.equals("map")) {
+                gamesExistente.setMap(null);
+            } else if (att.equals("players")) {
+                // Para eliminar todos los jugadores de un juego, puedes iterar sobre el conjunto y eliminarlos
+                // o simplemente establecer el conjunto a un nuevo HashSet vacío.
+                gamesExistente.setPlayers(new HashSet<>());
+            }
+            update(gamesExistente);
+        }
+    }
+
+    public void selectFromTable(String tableName) {
+        EntityManager em = entityManagerFactory.createEntityManager();
+        Session session1 = em.unwrap(Session.class);
+        try {
+            session1.getTransaction().begin();
+            String hql = "FROM " + tableName; // Aquí asumimos que los nombres de las clases de entidad son iguales a los nombres de las tablas en la base de datos
+            Query query = session1.createQuery(hql);
+            List<Object> result = query.getResultList();
+            if (!result.isEmpty()) {
+                System.out.println("Registros en la tabla " + tableName + ":");
+                for (Object obj : result) {
+                    System.out.println(obj.toString());
+                }
+            } else {
+                System.out.println("No se encontraron registros en la tabla " + tableName);
+            }
+            session1.getTransaction().commit();
+        } catch (Exception e) {
+            if (session1.getTransaction() != null && session1.getTransaction().isActive()) {
+                session1.getTransaction().rollback();
+            }
+            e.printStackTrace();
+        } finally {
+            if (session1 != null && session1.isOpen()) {
+                session1.close();
+            }
+        }
+    }
+
+    public void selectFromTable(String tableName, String columnName, String searchText) {
+        EntityManager em = entityManagerFactory.createEntityManager();
+        Session session1 = em.unwrap(Session.class);
+        try {
+            session1.getTransaction().begin();
+            String hql = "FROM " + tableName + " WHERE " + columnName + " LIKE :searchText";
+            Query query = session1.createQuery(hql);
+            query.setParameter("searchText", "%" + searchText + "%");
+            List<Object> result = query.getResultList();
+            if (!result.isEmpty()) {
+                System.out.println("Registros en la tabla " + tableName + " que contienen '" + searchText + "':");
+                for (Object obj : result) {
+                    System.out.println(obj.toString());
+                }
+            } else {
+                System.out.println("No se encontraron registros en la tabla " + tableName + " que contienen '" + searchText + "'");
+            }
+            session1.getTransaction().commit();
+        } catch (Exception e) {
+            if (session1.getTransaction() != null && session1.getTransaction().isActive()) {
+                session1.getTransaction().rollback();
+            }
+            e.printStackTrace();
+        } finally {
+            if (session1 != null && session1.isOpen()) {
+                session1.close();
+            }
+        }
+    }
+
+    public void selectFromTable(String tableName, String columnName, String condition, Object searchValue) {
+        EntityManager em = entityManagerFactory.createEntityManager();
+        Session session1 = em.unwrap(Session.class);
+        try {
+            session1.getTransaction().begin();
+            String hql = "FROM " + tableName + " WHERE " + columnName + " " + condition + " :searchValue";
+            Query query = session1.createQuery(hql);
+            query.setParameter("searchValue", searchValue);
+            List<Object> result = query.getResultList();
+            if (!result.isEmpty()) {
+                System.out.println("Registros en la tabla " + tableName + " donde " + columnName + " " + condition + " '" + searchValue + "':");
+                for (Object obj : result) {
+                    System.out.println(obj.toString());
+                }
+            } else {
+                System.out.println("No se encontraron registros en la tabla " + tableName + " donde " + columnName + " " + condition + " '" + searchValue + "'");
+            }
+            session1.getTransaction().commit();
+        } catch (Exception e) {
+            if (session1.getTransaction() != null && session1.getTransaction().isActive()) {
+                session1.getTransaction().rollback();
+            }
+            e.printStackTrace();
+        } finally {
+            if (session1 != null && session1.isOpen()) {
+                session1.close();
+            }
+        }
+    }
+
+
+    public void selectByIdFromTable(String tableName, int id) {
+        EntityManager em = entityManagerFactory.createEntityManager();
+        Session session1 = em.unwrap(Session.class);
+        try {
+            session1.getTransaction().begin();
+            Object entity = session1.get(Class.forName("model." + tableName), id);
+            if (entity != null) {
+                System.out.println("Registro en la tabla " + tableName + " con id " + id + ":");
+                System.out.println(entity.toString());
+            } else {
+                System.out.println("No se encontró el registro en la tabla " + tableName + " con id " + id);
+            }
+            session1.getTransaction().commit();
+        } catch (Exception e) {
+            if (session1.getTransaction() != null && session1.getTransaction().isActive()) {
+                session1.getTransaction().rollback();
+            }
+            e.printStackTrace();
+        } finally {
+            if (session1 != null && session1.isOpen()) {
+                session1.close();
+            }
+        }
+    }
+
     public void poblarTablas() throws SQLException, FileNotFoundException {
         try {
 
@@ -293,7 +517,7 @@ public class MainController {
             for (int i = 0; i < maps.size(); i++) {
                 insertar(maps.get(i));
             }
-            ArrayList<Game> games = gameController.readDataFromCSV();
+            ArrayList<Games> games = gameController.readDataFromCSV();
             for (int i = 0; i < games.size(); i++) {
                 insertar(games.get(i));
             }
@@ -385,8 +609,8 @@ public class MainController {
             playerSet.add(gameController.findPlayerByName(player1));
             playerSet.add(gameController.findPlayerByName(player2));
 
-            Game game = new Game(gameName, map, playerSet);
-            insertar(game);
+            Games games = new Games(gameName, map, playerSet);
+            insertar(games);
         }
     }
 

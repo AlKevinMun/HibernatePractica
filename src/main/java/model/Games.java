@@ -8,7 +8,7 @@ import java.util.Set;
 @Entity
 @Access(AccessType.FIELD)
 @Table(name = "games")
-public class Game {
+public class Games {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id_game")
@@ -28,14 +28,14 @@ public class Game {
             inverseJoinColumns = @JoinColumn(name = "player_id"))
     private Set<Player> players = new HashSet<>();
 
-    public Game(String name, Map map, Set<Player> players) {
+    public Games(String name, Map map, Set<Player> players) {
         super();
         this.name = name;
         this.map = map;
         this.players = players;
     }
 
-    public Game() {
+    public Games() {
         super();
     }
 
@@ -70,4 +70,23 @@ public class Game {
     public void setPlayers(Set<Player> players) {
         this.players = players;
     }
+
+    @Override
+    public String toString() {
+        StringBuilder sb = new StringBuilder();
+        sb.append(String.format("| %-10s | %-20s | %-20s |", "id_game", "game_name", "id_map"));
+        if (map != null) {
+            sb.append(String.format("\n| %-10s | %-20s | %-20s |", id, name, map.getId()));
+        } else {
+            sb.append(String.format("\n| %-10s | %-20s | %-20s |", id, name, ""));
+        }
+        if (!players.isEmpty()) {
+            sb.append("\nPlayers:");
+            for (Player player : players) {
+                sb.append(String.format("\n| %-10s | %-20s |", "", player.getName()));
+            }
+        }
+        return sb.toString();
+    }
+
 }

@@ -5,7 +5,7 @@
         <provider>org.hibernate.ejb.HibernatePersistence</provider>
 
         <properties>
-            <property name="javax.persistence.jdbc.url" value="jdbc:postgresql://192.168.0.50:5432/partidaaw"/>
+            <property name="javax.persistence.jdbc.url" value="jdbc:postgresql://192.168.248.60:5432/partidaaw"/>
             <property name="hibernate.hbm2ddl.auto" value="create-drop"/>
             <property name="javax.persistence.jdbc.driver" value="org.postgresql.Driver"/>
             <property name="javax.persistence.jdbc.user" value="usuario"/>

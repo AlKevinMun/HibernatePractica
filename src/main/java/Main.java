@@ -43,7 +43,7 @@ public class Main {
     }
 
     public static void main(String[] args) throws SQLException, FileNotFoundException {
-        ArrayList<Game> partidas = new ArrayList();
+        ArrayList<Games> partidas = new ArrayList();
 
         EntityManagerFactory entityManagerFactory = createEntityManagerFactory();
         EntityManager entityManager = entityManagerFactory.createEntityManager();
@@ -59,7 +59,54 @@ public class Main {
                     mainController.showTableNames();
                     break;
                 case 2:
-                    // Lógica para menu de las consultas
+
+                    switch (menu.menuQuerry()){
+                        case 1:
+                            mainController.showTableNames();
+                            System.out.println("Inserta la tabla de la que quieres ver los valores: ");
+                            mainController.selectFromTable(mainController.lecturaNombre());
+                            break;
+                        case 2:
+                            mainController.showTableNames();
+                            System.out.println("Inserta la tabla de la que quieres ver los valores: ");
+                            String table = mainController.lecturaNombre();
+                            System.out.println(table.toLowerCase());
+                            mainController.showAttributeNames(table.toLowerCase());
+                            System.out.println("Inserta la columna en la que quieres buscar:  ");
+                            String colum = mainController.lecturaNombre();
+                            System.out.println("Inserta el texto que quieres buscar: ");
+                            String text = mainController.lecturaNombre();
+                            mainController.selectFromTable(table,colum,text);
+                            break;
+                        case 3:
+                            mainController.showTableNames();
+                            System.out.println("Inserta la tabla de la que quieres ver los valores: ");
+                            String table1 = mainController.lecturaNombre();
+                            System.out.println(table1.toLowerCase());
+                            mainController.showAttributeNames(table1.toLowerCase());
+                            System.out.println("Inserta la columna en la que quieres buscar:  ");
+                            String colum1 = mainController.lecturaNombre();
+                            menu.showConditions();
+                            System.out.println("Inserta la condicion con la que quieres buscar (Poner los simbolos entre parentesis): ");
+                            String cond = mainController.lecturaNombre();
+                            System.out.println("Inserta el valor a buscar: ");
+                            int value = Integer.parseInt(mainController.lecturaNombre());
+                            mainController.selectFromTable(table1,colum1,cond, value);
+                            break;
+                        case 4:
+                            mainController.showTableNames();
+                            System.out.println("Inserta la tabla de la que quieres ver los valores: ");
+                            String table2 = mainController.lecturaNombre();
+                            System.out.println(table2.toLowerCase());
+                            System.out.println("Inserta la id que quieres buscar: ");
+                            int id = Integer.parseInt(mainController.lecturaNombre());
+                            mainController.selectByIdFromTable(table2,id);
+                            break;
+                        case 5:
+                            System.out.println("Saliendo de este menu");
+                            break;
+                    }
+
                     break;
                 case 3:
                     mainController.showTableNames();
@@ -72,7 +119,6 @@ public class Main {
                     mainController.editarEntidad(mainController.lecturaNombre());
                     break;
                 case 5:
-
                     switch (menu.menuDelete()){
                         case 1:
                             mainController.showTableNames();
@@ -80,11 +126,11 @@ public class Main {
                             break;
                         case 2:
                             mainController.showTableNames();
-
+                            mainController.eliminarRegistro(mainController.lecturaNombre());
                             break;
-
                         case 3:
                             mainController.showTableNames();
+                            mainController.eliminarRegistro(mainController.lecturaNombre());
                             break;
                         case 4:
                             System.out.println("Saliendo de este menu");

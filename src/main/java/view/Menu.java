@@ -35,7 +35,7 @@ public class Menu {
             System.out.println("2. Realizar consultas"); // SubMenu para las consultas
             System.out.println("3. Crear datos"); // - FINALIZADO -
             System.out.println("4. Modificar datos"); // - FINALIZADO -
-            System.out.println("5. Borrar datos"); // SubMenu para borrar datos
+            System.out.println("5. Borrar datos"); // - FINALIZADO -
             System.out.println("6. Poblar tablas"); // - FINALIZADO -
             System.out.println("7. Borrar tablas"); // - FINALIZADO -
             System.out.println("8. Salir"); // - FINALIZADO -
@@ -50,28 +50,13 @@ public class Menu {
         return option;
     }
 
-    /*
-    public int selectTable() throws IOException {
-        BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
-        System.out.println("\nSELECCIONA UNA TABLA\n");
-        System.out.println("1. Commander");
-        System.out.println("2. Map");
-        System.out.println("3. Player");
-        System.out.println("4. Games");
-        System.out.println("5. Salir");
-        System.out.print("Escoge una opción: ");
-        option = Integer.parseInt(br.readLine());
-        return option;
-    }
-     */
-
     public int menuDelete(){
         BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
         do {
             System.out.println("\nSUBMENU BORRAR DATOS\n");
-            System.out.println("1. Eliminar una entidad"); //
-            System.out.println("2. Eliminar un registro"); //
-            System.out.println("3. Eliminar conjunto registros"); //
+            System.out.println("1. Eliminar una entidad"); // - FINALIZADO - (Hay casos no funcionales)
+            System.out.println("2. Eliminar un registro"); // - FINALIZADO -
+            System.out.println("3. Eliminar conjunto registros"); // - FINALIZADO -
             System.out.println("4. Salir"); // - FINALIZADO -
             System.out.print("Escoge una opción: ");
             try {
@@ -84,7 +69,33 @@ public class Menu {
         return option;
     }
 
-
+    public int menuQuerry(){
+        BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
+        do {
+            System.out.println("\nSUBMENU CONSULTAR DATOS\n");
+            System.out.println("1. Consulta toda una tabla"); // - FINALIZADO -
+            System.out.println("2. Consulta texto concreto"); // -
+            System.out.println("3. Consulta condicion"); // -
+            System.out.println("4. Consulta elemento especifico"); // -
+            System.out.println("5. Salir"); // - FINALIZADO -
+            System.out.print("Escoge una opción: ");
+            try {
+                option = Integer.parseInt(br.readLine());
+            } catch (NumberFormatException | IOException e) {
+                System.out.println("Valor no válido");
+                e.printStackTrace();
+            }
+        } while (option < 1 || option > 4);
+        return option;
+    }
+    public void showConditions() {
+        System.out.println("1. Igual (=)");
+        System.out.println("2. No igual (!=)");
+        System.out.println("3. Menor que (<)");
+        System.out.println("4. Menor o igual que (<=)");
+        System.out.println("5. Mayor que (>)");
+        System.out.println("6. Mayor o igual que (>=)");
+    }
 
 }
 
