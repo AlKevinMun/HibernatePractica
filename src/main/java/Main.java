@@ -16,21 +16,14 @@ import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.Persistence;
 
+/**
+ * Clase Main. La que se ejecuta al iniciar el programa.
+ */
 public class Main {
-    static SessionFactory sessionFactoryObj;
-
-    private static SessionFactory buildSessionFactory() {
-        try {
-            StandardServiceRegistry standardRegistry = new StandardServiceRegistryBuilder()
-                    .configure("hibernate.cfg.xml").build();
-            Metadata metadata = new MetadataSources(standardRegistry).getMetadataBuilder().build();
-            return metadata.getSessionFactoryBuilder().build();
-        } catch (HibernateException he) {
-            System.out.println("Session Factory creation failure");
-            throw he;
-        }
-    }
-
+    /**
+     * Objeto que gestiona todo lo que tiene que ver con el Hibernate.
+     * @return Devuelve el objeto EntityManagerFactory
+     */
     public static EntityManagerFactory createEntityManagerFactory() {
         EntityManagerFactory emf;
         try {
@@ -43,10 +36,8 @@ public class Main {
     }
 
     public static void main(String[] args) throws SQLException, FileNotFoundException {
-        ArrayList<Games> partidas = new ArrayList();
 
         EntityManagerFactory entityManagerFactory = createEntityManagerFactory();
-        EntityManager entityManager = entityManagerFactory.createEntityManager();
 
         Menu menu = new Menu();
         MainController mainController = new MainController(entityManagerFactory);

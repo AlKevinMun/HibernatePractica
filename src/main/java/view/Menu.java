@@ -3,30 +3,24 @@ package view;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.util.List;
-import java.util.Scanner;
 
-import org.hibernate.HibernateException;
-import org.hibernate.Session;
-import org.hibernate.boot.Metadata;
-import org.hibernate.boot.MetadataSources;
-import org.hibernate.boot.registry.StandardServiceRegistry;
-import org.hibernate.boot.registry.StandardServiceRegistryBuilder;
-import org.hibernate.mapping.PersistentClass;
-import org.hibernate.mapping.Table;
-import org.hibernate.query.Query;
-
-import javax.persistence.EntityManager;
-import javax.persistence.EntityManagerFactory;
-
+/**
+ * Clase del menu donde se encuentran todos los menus con datos estaticos.
+ */
 public class Menu {
-
+    /**
+     * Variable donde se almacena la elección del usuario
+     */
     private int option;
 
     public Menu() {
         super();
     }
 
+    /**
+     * Metodo donde se muestra el menu principal del programa.
+     * @return Devuelve el valor que el usuario a seleccionado
+     */
     public int mainMenu() {
         BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
         do {
@@ -50,6 +44,10 @@ public class Menu {
         return option;
     }
 
+    /**
+     * Metodo donde se muestra el sub-menu de los deletes.
+     * @return Devuelve el valor que el usuario a seleccionado
+     */
     public int menuDelete(){
         BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
         do {
@@ -68,7 +66,10 @@ public class Menu {
         } while (option < 1 || option > 4);
         return option;
     }
-
+    /**
+     * Metodo donde se muestra el sub-menu de los selects.
+     * @return Devuelve el valor que el usuario a seleccionado
+     */
     public int menuQuerry(){
         BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
         do {
@@ -88,6 +89,9 @@ public class Menu {
         } while (option < 1 || option > 4);
         return option;
     }
+    /**
+     * Metodo donde se muestran todas las condiciones a seleccionar.
+     */
     public void showConditions() {
         System.out.println("1. Igual (=)");
         System.out.println("2. No igual (!=)");
