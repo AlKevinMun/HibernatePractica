@@ -16,6 +16,7 @@ import javax.persistence.TypedQuery;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Root;
+import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 import java.sql.SQLException;
@@ -23,21 +24,41 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-
+/**
+ * Controller para la clase Game.
+ */
 public class GameController {
-
+    /**
+     * Atributo requerido para que Hibernate funcione correctamente.
+     */
     EntityManagerFactory entityManagerFactory;
+    /**
+     * Atributo requerido para que Hibernate funcione correctamente.
+     */
     private final EntityManager entityManager;
+    /**
+     * Atributo requerido para que Hibernate funcione correctamente.
+     */
     private final Session session;
 
 
-
+    /**
+     * Constructor del controlador donde se instancian todas las clases necesarias para Hibernte
+     * @param entityManagerFactory La clase necesaria para poder crear un EntityManager-
+     */
     public GameController(EntityManagerFactory entityManagerFactory) {
         this.entityManagerFactory = entityManagerFactory;
         this.entityManager = entityManagerFactory.createEntityManager();
         this.session = this.entityManager.unwrap(Session.class);
     }
 
+    /**
+     * Este Método se trata de uno que se basa en leer un fichero CSV y convertir los datos del mismo fichero en clases
+     * dentro del propio Java.
+     * @return Devuelve la lista de games que extrae del documento CSV
+     * @throws FileNotFoundException Excepcion que salta si no se encuentra el fichero
+     * @throws SQLException Excepcion
+     */
     public ArrayList<Games> readDataFromCSV() throws IOException, SQLException, CsvValidationException {
         CSVReader reader = new CSVReader(new FileReader("src/main/resources/games.csv"));
         String[] data = null;
@@ -73,6 +94,11 @@ public class GameController {
         return games;
     }
 
+    /**
+     * Método para que a partir del nombre de un mapa, buscarlo dentro de los mapas y si existe pasarlo.
+     * @param mapName Nombre del mapa que se busca
+     * @return clase Map
+     */
     public Map findMapByName(String mapName) {
         try {
             return entityManager.createQuery("SELECT c FROM Map c WHERE c.mapName = :name", Map.class)
@@ -83,6 +109,11 @@ public class GameController {
         }
     }
 
+    /**
+     * Método para que a partir del nombre de un player, buscarlo en un game, y si esta, devolverlo
+     * @param playerName Nomber del player
+     * @return clase Player
+     */
     public Player findPlayerByName(String playerName) {
         try {
             return entityManager.createQuery("SELECT c FROM Player c WHERE c.name = :name", Player.class)
@@ -92,6 +123,12 @@ public class GameController {
             return null;
         }
     }
+
+    /**
+     * Método para que a partir del nombre de un game, buscarlo, y si esta, devolverlo
+     * @param gameName Nomber del game
+     * @return clase Game
+     */
     public Games findGameByName(String gameName) {
         try {
             return entityManager.createQuery("SELECT c FROM Game c WHERE c.name = :name", Games.class)
@@ -102,6 +139,11 @@ public class GameController {
         }
     }
 
+    /**
+     * Método para que a partir de un mapa, buscar los juegos donde se usa este
+     * @param map Clase mapa que se está buscando
+     * @return Devuelve el juego donde se encuentra.
+     */
     public List<Games> findGamesByMap(Map map) {
         EntityManager entityManager = entityManagerFactory.createEntityManager();
         try {
@@ -115,7 +157,11 @@ public class GameController {
             entityManager.close();
         }
     }
-
+    /**
+     * Método para que a partir de un player, buscar los juegos donde se usa este
+     * @param player Clase player que se está buscando
+     * @return Devuelve el juego donde se encuentra.
+     */
     public List<Games> findGamesByPlayer(Player player) {
         EntityManager entityManager = entityManagerFactory.createEntityManager();
         try {
@@ -130,7 +176,9 @@ public class GameController {
             entityManager.close();
         }
     }
-
+    /**
+     * Método para mostrar por pantalla el nombre de todos los games existentes dentro de la base de datos.
+     */
     public void showGamesNames() {
         EntityManager em = entityManagerFactory.createEntityManager();
         try {

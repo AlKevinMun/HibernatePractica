@@ -15,16 +15,44 @@ import java.io.FileNotFoundException;
 import java.sql.SQLException;
 import java.util.*;
 
+/**
+ * Esta clase se trata del MainController. En este controller es donde se encuentra casi toda la logica del programa.
+ */
 public class MainController {
+    /**
+     * Atributo requerido para que Hibernate funcione correctamente.
+     */
     private EntityManagerFactory entityManagerFactory;
+    /**
+     * Atributo requerido para que Hibernate funcione correctamente.
+     */
     @PersistenceContext
     private final EntityManager entityManager;
+    /**
+     * Atributo requerido para que Hibernate funcione correctamente.
+     */
     private final Session session;
-    CommanderController commanderController; // = new CommanderController(entityManagerFactory);
-    PlayerController playerController; //7 = new PlayerController(entityManagerFactory);
+    /**
+     * Instancia del commanderController
+     */
+    CommanderController commanderController;
+    /**
+     * Instancia del playerController
+     */
+    PlayerController playerController;
+    /**
+     * Instancia del mapController
+     */
     MapController mapController;
+    /**
+     * Instancia del gameController
+     */
     GameController gameController;
 
+    /**
+     * Constructor del controlador donde se instancian todas las clases necesarias para Hibernte, además de crear las instancias con datos de los controllers.
+     * @param entityManagerFactory La clase necesaria para poder crear un EntityManager
+     */
     public MainController(EntityManagerFactory entityManagerFactory) {
         this.entityManagerFactory = entityManagerFactory;
         this.entityManager = entityManagerFactory.createEntityManager();
@@ -36,7 +64,9 @@ public class MainController {
         this.gameController = new GameController(entityManagerFactory);
     }
 
-
+    /**
+     * Este Método lo que hace es realizar un select para obtener el nombre de todas las tablas de la base de datos, y mostrar por pantalla los mismos
+     */
     public void showTableNames() {
         EntityManager em = entityManagerFactory.createEntityManager();
         try {
@@ -60,7 +90,10 @@ public class MainController {
             System.out.println("Error al mostrar las tablas: " + ex.getMessage());
         }
     }
-
+    /**
+     * Este Método lo que hace es realizar un select para obtener el nombre de todos los atributos de la tabla que se proporciona
+     * @param attName Nombre de la tabla en al que buscar los atributos
+     */
     public void showAttributeNames(String attName) {
         EntityManager em = entityManagerFactory.createEntityManager();
         try {
@@ -84,7 +117,11 @@ public class MainController {
             em.close();
         }
     }
-
+    /**
+     * Método que hace un uso de Hibernate para que a partir de cualquier objeto que se le pase, este lo inserte a la base
+     * de datos de forma inteligente, sabiendo en que tabla va, y añadiendo todo sin ningun problema.
+     * @param object Cualquier objeto. En este caso se usan objetos como Commander, Player, etc.
+     */
     public void insertar(Object object){
         EntityManager em = entityManagerFactory.createEntityManager();
         Session session1 = em.unwrap(Session.class);
@@ -94,6 +131,11 @@ public class MainController {
         session1.clear();
         session1.close();
     }
+    /**
+     * Método que hace un uso de Hibernate para que a partir de cualquier objeto que se le pase, este lo borrara de la base
+     * de datos de forma inteligente.
+     * @param object Cualquier objeto. En este caso se usan objetos como Commander, Player, etc.
+     */
     public void delete(Object object){
         EntityManager em = entityManagerFactory.createEntityManager();
         Session session1 = em.unwrap(Session.class);
@@ -107,6 +149,11 @@ public class MainController {
         session1.clear();
         session1.close();
     }
+    /**
+     * Método que hace un uso de Hibernate para que a partir de cualquier objeto que se le pase, este le un update
+     *  dentro de datos de forma inteligente.
+     * @param object Cualquier objeto. En este caso se usan objetos como Commander, Player, etc.
+     */
     public void update(Object object){
         EntityManager em = entityManagerFactory.createEntityManager();
         Session session1 = em.unwrap(Session.class);
@@ -116,7 +163,11 @@ public class MainController {
         session1.clear();
         session1.close();
     }
-
+    /**
+     * Método para editar una de las entidades de la base de datos. Su funcionamiento es muy simple. Seleccionas que
+     * entidad quieres editar y vas rellenando todos los nuevos valores para editar este.
+     * @param option Nombre de la tabla donde quieres interactuar
+     */
     public void editarEntidad(String option) {
         Scanner scanner = new Scanner(System.in);
         if (option.equals("commander")) {
@@ -250,6 +301,13 @@ public class MainController {
             System.out.println("Opción no válida.");
         }
     }
+
+    /**
+     * Método para eliminar toda una entidad de la base de datos. Su funcionamiento es un tanto complejo dependiendo de
+     * la tabla origen de la entidad. Lo que hace es leer el nombre de la entidad a borrar, y si existe, borra primero
+     * todas las referencias que tiene en otras tablas, y tras eso la borra de su tabla.
+     * @param option Nombre de la tabla donde quieres interactuar
+     */
     public void eliminarEntidad(String option) {
         Scanner scanner = new Scanner(System.in);
 
@@ -323,6 +381,12 @@ public class MainController {
             delete(games);
         }
     }
+    /**
+     * Método para eliminar un registro concreto en al base de datos. No es tan complejo como la entidad. Lo primero que
+     * haces al igual que con eliminar la entidad es elegir sobre que elemento quieres realizar el borrado. Tras eso
+     * Eliges el atributo de la entidad, y este lo que hace es dejarlo en blanco.
+     * @param option Nombre de la tabla donde quieres interactuar
+     */
     public void eliminarRegistro(String option){
         Scanner scanner = new Scanner(System.in);
         showAttributeNames(option);
@@ -386,7 +450,10 @@ public class MainController {
             update(gamesExistente);
         }
     }
-
+    /**
+     * Método para realizar una querry de toda la tabla que se le proporcione.
+     * @param tableName Nombre de la tabla en la que realizar el select.
+     */
     public void selectFromTable(String tableName) {
         EntityManager em = entityManagerFactory.createEntityManager();
         Session session1 = em.unwrap(Session.class);
@@ -415,7 +482,12 @@ public class MainController {
             }
         }
     }
-
+    /**
+     * Método para realizar una querry en la que se tenga un texto concreto sobre una tabla.
+     * @param tableName Nombre de la tabla en al que se realiza en select
+     * @param columnName Nombre de la columna en la que se va a buscar
+     * @param searchText Texto a buscar dentro de la columna
+     */
     public void selectFromTable(String tableName, String columnName, String searchText) {
         EntityManager em = entityManagerFactory.createEntityManager();
         Session session1 = em.unwrap(Session.class);
@@ -445,7 +517,13 @@ public class MainController {
             }
         }
     }
-
+    /**
+     * Método para realizar una querry basada en una condicion proporcionada por el usuario sobre una tabla.
+     * @param tableName Nombre de la tabla en la que se realizara el select
+     * @param columnName Nombre de la columna en la que se va a buscar
+     * @param condition La condicion de busqueda
+     * @param searchValue El valor que se está buscando
+     */
     public void selectFromTable(String tableName, String columnName, String condition, Object searchValue) {
         EntityManager em = entityManagerFactory.createEntityManager();
         Session session1 = em.unwrap(Session.class);
@@ -475,8 +553,11 @@ public class MainController {
             }
         }
     }
-
-
+    /**
+     * Método para realizar una querry basada en un ID sobre una tabla
+     * @param tableName Nombre de la tabla en al que se realiza el select
+     * @param id El ID que se está buscando dentro de la tabla
+     */
     public void selectByIdFromTable(String tableName, int id) {
         EntityManager em = entityManagerFactory.createEntityManager();
         Session session1 = em.unwrap(Session.class);
@@ -502,6 +583,12 @@ public class MainController {
         }
     }
 
+    /**
+     * Método donde se len todos los ficheros CSV y se insertan dentro de la base de datos los datos que se encuentran en
+     * estos ficheros
+     * @throws SQLException
+     * @throws FileNotFoundException
+     */
     public void poblarTablas() throws SQLException, FileNotFoundException {
         try {
 
@@ -528,6 +615,10 @@ public class MainController {
         }
     }
 
+    /**
+     * Método para borrar toda una tabla de la base de datos, ya tenga o no datos.
+     * @param nombreTabla Nombre de la tabla a ser borrada
+     */
     public void eliminarTabla(String nombreTabla) {
         EntityManager em = entityManagerFactory.createEntityManager();
         Session session1 = em.unwrap(Session.class);
@@ -549,7 +640,11 @@ public class MainController {
             }
         }
     }
-    
+
+    /**
+     * Método para crear toda una entidad de cero
+     * @param option Nombre de la tabla en al que crear la entidad
+     */
     public void crearEntidad(String option){
         Scanner scanner = new Scanner(System.in);
         if (option.equals("commander")){
@@ -613,7 +708,10 @@ public class MainController {
             insertar(games);
         }
     }
-
+    /**
+     * Método para realizar la lectura de un String
+     * @return Devuelve la palabra que ha sido leida.
+     */
     public String lecturaNombre(){
         Scanner scanner = new Scanner(System.in);
         String palabra = scanner.next();

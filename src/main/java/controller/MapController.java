@@ -21,18 +21,38 @@ import java.util.List;
 import java.util.Scanner;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-
+/**
+ * Controller para la clase Map.
+ */
 public class MapController {
+    /**
+     * Atributo requerido para que Hibernate funcione correctamente.
+     */
     EntityManagerFactory entityManagerFactory;
+    /**
+     * Atributo requerido para que Hibernate funcione correctamente.
+     */
     private final EntityManager entityManager;
+    /**
+     * Atributo requerido para que Hibernate funcione correctamente.
+     */
     private final Session session;
-
+    /**
+     * Constructor del controlador donde se instancian todas las clases necesarias para Hibernte
+     * @param entityManagerFactory La clase necesaria para poder crear un EntityManager-
+     */
     public MapController(EntityManagerFactory entityManagerFactory) {
         this.entityManagerFactory = entityManagerFactory;
         this.entityManager = entityManagerFactory.createEntityManager();
         this.session = this.entityManager.unwrap(Session.class);
     }
-
+    /**
+     * Este Método se trata de uno que se basa en leer un fichero CSV y convertir los datos del mismo fichero en clases
+     * dentro del propio Java.
+     * @return Devuelve la lista de Maps que extrae del documento CSV
+     * @throws FileNotFoundException Excepcion que salta si no se encuentra el fichero
+     * @throws SQLException Excepcion
+     */
     public ArrayList<Map> readDataFromCSV() throws IOException, SQLException, CsvValidationException {
         CSVReader reader = new CSVReader(new FileReader("src/main/resources/map.csv"));
         String[] data = null;
@@ -50,7 +70,9 @@ public class MapController {
         }
         return maps;
     }
-
+    /**
+     * Método para mostrar por pantalla el nombre de todos los mapas existentes dentro de la base de datos.
+     */
     public void showMapNames() {
         EntityManager em = entityManagerFactory.createEntityManager();
         try {

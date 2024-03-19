@@ -29,20 +29,40 @@ import java.util.List;
 import java.util.Scanner;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-
+/**
+ * Controller para la clase Player.
+ */
 public class PlayerController {
+    /**
+     * Atributo requerido para que Hibernate funcione correctamente.
+     */
     EntityManagerFactory entityManagerFactory;
+    /**
+     * Atributo requerido para que Hibernate funcione correctamente.
+     */
     private final EntityManager entityManager;
+    /**
+     * Atributo requerido para que Hibernate funcione correctamente.
+     */
     private final Session session;
 
-
+    /**
+     * Constructor del controlador donde se instancian todas las clases necesarias para Hibernte
+     * @param entityManagerFactory La clase necesaria para poder crear un EntityManager-
+     */
     public PlayerController(EntityManagerFactory entityManagerFactory) {
         this.entityManagerFactory = entityManagerFactory;
         this.entityManager = entityManagerFactory.createEntityManager();
         this.session = this.entityManager.unwrap(Session.class);
     }
 
-
+    /**
+     * Este método se trata de uno que se basa en leer un fichero CSV y convertir los datos del mismo fichero en clases
+     * dentro del propio Java.
+     * @return Devuelve la lista de Players que extrae del documento CSV
+     * @throws FileNotFoundException Excepcion que salta si no se encuentra el fichero
+     * @throws SQLException Excepcion
+     */
     public ArrayList<Player> readDataFromCSV() throws IOException, SQLException, CsvValidationException {
         CSVReader reader = new CSVReader(new FileReader("src/main/resources/player.csv"));
         String[] data = null;
@@ -80,6 +100,11 @@ public class PlayerController {
         return players;
     }
 
+    /**
+     * Método para que a partir del nombre de un comandante, buscarlo dentro de los players y si existe pasarlo.
+     * @param commanderName Nombre del commandante que se busca
+     * @return clase commander
+     */
     public Commander findCommanderByName(String commanderName) {
         try {
             return entityManager.createQuery("SELECT c FROM Commander c WHERE c.commanderName = :name", Commander.class)
@@ -91,6 +116,11 @@ public class PlayerController {
         }
     }
 
+    /**
+     * Método para que a partir de un comandante, encontrar que player hace uso de este.
+     * @param commander Objeto commandante que se va a buscar
+     * @return Devuelve la querry con el resultado.
+     */
     public List<Player> findPlayersByCommander(Commander commander) {
         EntityManager entityManager = entityManagerFactory.createEntityManager();
         try {
@@ -105,7 +135,9 @@ public class PlayerController {
             entityManager.close();
         }
     }
-
+    /**
+     * Método para mostrar por pantalla el nombre de todos los players existentes dentro de la base de datos.
+     */
     public void showPlayerNames() {
         EntityManager em = entityManagerFactory.createEntityManager();
         try {
